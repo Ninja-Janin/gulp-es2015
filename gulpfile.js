@@ -4,6 +4,8 @@ var gulp   = require('gulp'),
 	browserSync = require('browser-sync'),
 	babel       = require('gulp-babel'),
 	rollup 		= require('rollup-stream'),
+	nodeResolve = require('rollup-plugin-node-resolve'),
+	commonjs  	= require('rollup-plugin-commonjs'),
 	source 		= require('vinyl-source-stream'),
 	buffer		= require('vinyl-buffer'),
 	sourcemaps  = require('gulp-sourcemaps');
@@ -16,16 +18,25 @@ gulp.task('clear-bundle', function(cb) {
 gulp.task('bundle',['clear-bundle'], function() {
     // Single entry point to browserify
     return rollup({
-			entry: './src/app.js',
+			entry: './src/app/app.js',
 			sourceMap: true,
+			plugins: [
+				nodeResolve({
+					jsnext: true,
+					main: true,
+				}),
+				commonjs({
+					include: 'node_modules/**',
+				}),
+			]
 		})
-		.pipe(source('app.js', './src'))
+		.pipe(source('app.js', './src/app'))
 		.pipe(buffer())
 		.pipe(sourcemaps.init({loadMaps: true}))
 		.pipe(uglify())
 		.pipe(sourcemaps.write({
 			destPath: '.',
-			sourceRoot: '/src',
+			sourceRoot: '/src/app',
 		}))
 		.pipe(gulp.dest('./build/', {
 			overwrite: true
@@ -40,7 +51,7 @@ gulp.task('watch',['bundle'] ,function(){
 			baseDir: './'
 		}
 	});
-	gulp.watch('src/*.js',['script-watch','bundle']);
+	gulp.watch('src/**/*.js',['script-watch','bundle']);
 	gulp.watch('./*.html',['script-watch','bundle']);
 });
 

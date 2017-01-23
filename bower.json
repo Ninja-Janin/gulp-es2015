@@ -1,0 +1,23 @@
+{
+  "name": "promise",
+  "description": "",
+  "main": "gulp.js",
+  "authors": [
+    "mastermind"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/Ninja-Janin/gulp-es2015",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "bootstrap-sass": "^3.3.7",
+    "font-awesome": "^4.7.0",
+    "angular-bootstrap": "^2.4.0"
+  }
+}
