@@ -1,64 +1,28 @@
 var gulp        = require('gulp'),
-	$           = require('gulp-load-plugins')(),
-	rimraf      = require('rimraf'),
+	util  =  require('gulp-util'),
 	browserSync = require('browser-sync'),
-	rollup      = require('rollup-stream'),
-	nodeResolve = require('rollup-plugin-node-resolve'),
-	commonjs    = require('rollup-plugin-commonjs'),
-	source      = require('vinyl-source-stream'),
-	buffer      = require('vinyl-buffer');
+	bundle = require('./transpile'),
+	reload = require('./reload');
 
-gulp.task('copyFonts', function(){
-    return gulp.src('./bower_components/font-awesome/fonts/**/*.*')
-        .pipe(gulp.dest('public/fonts'));
-});
+gulp.task('watch',function(){
 
-gulp.task('copyViews', function(){
-    return gulp.src('src/app/**/*.html')
-        .pipe(gulp.dest('public'))
-        .pipe(browserSync.stream());
-});
-
-gulp.task('clear-bundle', function(cb) {
-	return rimraf('./build', cb);
-});
-
-gulp.task('bundle',['copyViews','copyFonts','clear-bundle'], function() {
-    return rollup({
-			entry: './src/app/app.js',
-			sourceMap: true,
-			plugins: [
-				nodeResolve({
-					jsnext: true,
-					main: true,
-				}),
-				commonjs({
-					include: 'node_modules/**',
-				}),
-			]
-		})
-		.pipe(source('app.js', './src/app'))
-		.pipe(buffer())
-		.pipe($.sourcemaps.init({loadMaps: true}))
-		.pipe($.uglify())
-		.pipe($.sourcemaps.write({
-			destPath: '.',
-			sourceRoot: '/src/app',
-		}))
-		.pipe(gulp.dest('./build/', {
-			overwrite: true
-		}))
-});
-
-gulp.task('script-watch',browserSync.reload);
-
-gulp.task('watch',['bundle'] ,function(){
 	browserSync({
 		server:{
 			baseDir: './'
 		}
 	});
-	gulp.watch('src/**/*.js',['script-watch','bundle']);
-	gulp.watch('./*.html',['script-watch','bundle']);
+
+	gulp.watch('src/app/**/*.js', ['reload']),
+	gulp.watch('src/app/**/*.html', ['reload'])
+        .on('change', function(file) {
+            // util.log('Starting transpile...');
+            util.log('LukeMags transpiler starting...');
+
+            bundle(file.path)
+                .on('end', function() {
+                    util.log('Finished transpile.');
+                    util.log('Starting bundle...');
+                });
+        });
 });
 
